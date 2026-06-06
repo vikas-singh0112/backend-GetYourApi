@@ -1,0 +1,27 @@
+{
+	"compilerOptions": {
+		"rootDir": "./src",
+		"outDir": "./dist",
+
+		"module": "ESNext", // Allows modern ES module syntax
+		"moduleResolution": "Bundler", //Eliminates the need for .js extensions
+		"verbatimModuleSyntax": false, // Turned off to allow flexible TS-style imports
+
+		"target": "ES2022",
+		"types": ["node"],
+
+		"sourceMap": true,
+		"declaration": true,
+		"declarationMap": true,
+
+		"strict": true,
+		"noUncheckedIndexedAccess": true,
+		"exactOptionalPropertyTypes": true,
+
+		"isolatedModules": true,
+		"noUncheckedSideEffectImports": true,
+		"moduleDetection": "force",
+		"skipLibCheck": true
+	},
+	"include": ["src/**/*"]
+}
