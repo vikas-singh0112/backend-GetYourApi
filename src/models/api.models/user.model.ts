@@ -1,10 +1,10 @@
-import mongoose, { Document, model, Model,  Schema } from "mongoose";
+import mongoose, { Document, model, Model, Schema } from "mongoose";
 
 export interface IUser extends Document {
 	fullName: string;
 	userName: string;
 	email: string;
-	phoneNumber: Number;
+	phoneNumber: string;
 	role: string;
 	birthDate: Date;
 	address: string;
@@ -29,6 +29,7 @@ const userSchema = new Schema<IUser>(
 		userName: {
 			type: String,
 			required: [true, "username is required"],
+			unique: true,
 			trim: true,
 			lowercase: true,
 			maxlength: [50, "username cannot exceed 50 characters"],
@@ -45,7 +46,7 @@ const userSchema = new Schema<IUser>(
 			match: [/^\S+@\S+\.\S+$/, "Please use a valid email address"],
 		},
 		phoneNumber: {
-			type: Number,
+			type: String,
 			required: [true, "phone no is required"],
 			maxlength: [20, "Phone number cannot exceed 20 numbers"],
 		},
@@ -89,5 +90,7 @@ const userSchema = new Schema<IUser>(
 	{ timestamps: true },
 );
 
-const User: Model<IUser> = mongoose.models.User || model<IUser>("User", userSchema);
+const User: Model<IUser> =
+	mongoose.models.User || model<IUser>("User", userSchema);
 export default User;
+
