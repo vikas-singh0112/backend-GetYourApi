@@ -1,3 +1,4 @@
+import jwt from "jsonwebtoken";
 import User from "../models/api.models/user.model";
 import {
 	createUserSchema,
@@ -18,9 +19,10 @@ const userService = factoryFun({
 });
 
 export const getUsers = asyncHandler(async (req, res) => {
-	const { limit } = getUserSchema.shape.query.parse(req.query);
+	const { limit, scope } = getUserSchema.shape.query.parse(req.query);
+	const authHeader = req.headers.authorization;
 
-	const data = await userService.getData(limit);
+	const data = await userService.getData(limit, authHeader as string, scope);
 
 	return res.status(200).json(data);
 });
@@ -51,6 +53,7 @@ export const deleteUser = asyncHandler(async (req, res) => {
 
 export const createUser = asyncHandler(async (req, res) => {
 	const userData = createUserSchema.shape.body.parse(req.body);
+	const authHeader = req.headers.authorization;
 
 	const existingUser = await User.findOne({
 		$or: [{ email: userData.email }, { userName: userData.userName }],
@@ -58,18 +61,54 @@ export const createUser = asyncHandler(async (req, res) => {
 
 	if (existingUser) {
 		if (existingUser.email === userData.email) {
-			throw new ApiError(400, "A user with this email already exists");
+			throw new ApiError({
+				statusCode: 400,
+				message: "A user with this email already exists",
+			});
 		}
 		if (existingUser.userName === userData.userName) {
-			throw new ApiError(400, "This username is already taken");
+			throw new ApiError({statusCode:400,message: "This username is already taken"});
 		}
+	}
+
+	if (authHeader && authHeader.startsWith("Bearer ")) {
+		const token = authHeader.replace("Bearer ", "");
+		const decoded = jwt.verify(token, process.env.SECRET_TOKEN as string) as {
+			id: string;
+		};
+
+		const alreadyCreated = await User.find({
+			developerId: decoded.id,
+		});
+
+		if (alreadyCreated.length >= 10) {
+			throw new ApiError({statusCode:400,message: "already created 10 users "});
+		}
+
+		const newUser = await User.create({
+			...userData,
+			developerId: decoded.id,
+			isGlobal: false,
+		});
+
+		const userObject = newUser.toObject();
+		const { developerId, isGlobal, __v, ...safeData } = userObject;
+
+		const data = ApiResponse({
+			data: safeData,
+			statusCode: 201,
+			message: "user created successfully",
+		});
+
+		return res.status(201).json(data);
 	}
 
 	// if not existing user create a fake response and send the user data
 	const data = ApiResponse({
 		data: userData,
 		statusCode: 201,
-		message: "user created successfully",
+		message:
+			"user created, its a mock response for actually creating user signin and copy the secret token and send the token as authorization header along with data",
 	});
 
 	return res.status(201).json(data);

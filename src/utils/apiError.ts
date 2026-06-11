@@ -1,13 +1,23 @@
 export class ApiError extends Error {
 	public statusCode: number;
 	public success: boolean;
+	public errors?: unknown;
 
-	constructor(
-		statusCode: number,
-		message: string = "Something went wrong",
-	) {
+	constructor({
+		statusCode,
+		message = "Something went wrong",
+		errors,
+	}: {
+		statusCode: number;
+		message?: string;
+		errors?: unknown;
+	}) {
 		super(message);
-        this.statusCode = statusCode;
+		this.name = "ApiError";
+		this.statusCode = statusCode;
 		this.success = false;
+		this.errors = errors;
+
+		Object.setPrototypeOf(this, ApiError.prototype);
 	}
 }

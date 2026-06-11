@@ -1,7 +1,8 @@
-import { Model as mongooseModel } from "mongoose";
+import { Model as mongooseModel, Types } from "mongoose";
 import { ApiResponse } from "./apiResponse";
 import { ApiError } from "./apiError";
-import { CreateUserBody } from "../schemas/user.schema";
+import jwt from "jsonwebtoken";
+import { verifyJwtSecret } from "../models/api.models/user.model";
 
 type Props<T> = {
 	Model: mongooseModel<T>;
@@ -11,28 +12,56 @@ type Props<T> = {
 
 const factoryFun = <T>({ Model, ModelName, SearchField }: Props<T>) => {
 	return {
-		getData: async (limit: number) => {
-			const data = await Model.find({}).limit(limit);
-			console.log(data);
+		getData: async (limit: number, authHeader: string, scope: string) => {
+			console.log("one");
+			let query: Record<string, any> = {};
+
+			if (scope === "user") {
+				console.log("two");
+
+				if (!authHeader || !authHeader.startsWith("Bearer ")) {
+					console.log("three");
+					throw new ApiError({
+						statusCode: 401,
+						message: "Unauthorized: User scope requires a valid secret token",
+					});
+				}
+
+				const token = authHeader.split(" ")[1];
+				console.log("four");
+
+				const id = await verifyJwtSecret(token as string);
+
+				query.developerId = id;
+			}
+			console.log("five");
+
+			const data = await Model.find(query)
+				.limit(limit)
+				.select("-isGlobal -developerId -__v");
 
 			if (!data || data.length === 0) {
-				throw new ApiError(404, `${ModelName}  not found`);
+				throw new ApiError({
+					statusCode: 404,
+					message: `${ModelName}s not found`,
+				});
 			}
 
-			const response = ApiResponse({
-				data: data,
+			return ApiResponse({
+				data,
 				statusCode: 200,
 				message: `${ModelName} fetched successfully`,
 			});
-
-			return response;
 		},
 
 		findById: async (id: string) => {
 			const data = await Model.findById(id);
 
 			if (!data) {
-				throw new ApiError(404, `${ModelName} not found`);
+				throw new ApiError({
+					statusCode: 404,
+					message: `${ModelName} not found`,
+				});
 			}
 
 			const response = ApiResponse({
@@ -53,7 +82,10 @@ const factoryFun = <T>({ Model, ModelName, SearchField }: Props<T>) => {
 			}).limit(limit);
 
 			if (!data || data.length === 0) {
-				throw new ApiError(404, `${ModelName} not found`);
+				throw new ApiError({
+					statusCode: 404,
+					message: `${ModelName} not found`,
+				});
 			}
 
 			const response = ApiResponse({
@@ -69,7 +101,10 @@ const factoryFun = <T>({ Model, ModelName, SearchField }: Props<T>) => {
 		delete: async (id: string) => {
 			const data = Model.findById(id);
 			if (!data) {
-				throw new ApiError(404, `${ModelName} not found`);
+				throw new ApiError({
+					statusCode: 404,
+					message: `${ModelName} not found`,
+				});
 			}
 
 			const response = ApiResponse({

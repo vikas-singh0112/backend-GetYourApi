@@ -1,4 +1,13 @@
-import mongoose, { Document, model, Model, Schema } from "mongoose";
+import mongoose, {
+	Document,
+	model,
+	Model,
+	ObjectId,
+	Schema,
+	Types,
+} from "mongoose";
+import jwt from "jsonwebtoken";
+import { ApiError } from "../../utils/apiError";
 
 export interface IUser extends Document {
 	fullName: string;
@@ -12,6 +21,8 @@ export interface IUser extends Document {
 	state: string;
 	country: string;
 	zipCode: string;
+	isGlobal: boolean;
+	developerId: Types.ObjectId;
 	createdAt: Date;
 	updatedAt: Date;
 }
@@ -42,7 +53,7 @@ const userSchema = new Schema<IUser>(
 			unique: true,
 			trim: true,
 			lowercase: true,
-			maxlength: [30, "Email cannot exceed 30 characters"],
+			maxlength: [100, "Email cannot exceed 100 characters"],
 			match: [/^\S+@\S+\.\S+$/, "Please use a valid email address"],
 		},
 		phoneNumber: {
@@ -69,28 +80,64 @@ const userSchema = new Schema<IUser>(
 		city: {
 			type: String,
 			required: [true, "City is required"],
-			maxlength: [30, "City cannot exceed 30 characters"],
+			maxlength: [100, "City cannot exceed 100 characters"],
 		},
 		state: {
 			type: String,
 			required: [true, "State is required"],
-			maxlength: [30, "State cannot exceed 30 characters"],
+			maxlength: [100, "State cannot exceed 100 characters"],
 		},
 		country: {
 			type: String,
 			required: [true, "Country is required"],
-			maxlength: [30, "Country cannot exceed 30 characters"],
+			maxlength: [100, "Country cannot exceed 100 characters"],
 		},
 		zipCode: {
 			type: String,
 			required: [true, "Zip code is required"],
 			maxlength: [6, "Zip code cannot exceed 6 characters"],
 		},
+		isGlobal: {
+			type: Boolean,
+			default: true,
+			required: true,
+		},
+		developerId: {
+			type: Schema.Types.ObjectId,
+			ref: "Consumer",
+		},
 	},
 	{ timestamps: true },
+);
+
+userSchema.index(
+	{ createdAt: 1 },
+	{
+		expireAfterSeconds: 86400, // 24 hours
+		partialFilterExpression: { isGlobal: false }, // Only apply to temporary users
+	},
 );
 
 const User: Model<IUser> =
 	mongoose.models.User || model<IUser>("User", userSchema);
 export default User;
 
+export const verifyJwtSecret = async (token: string) => {
+	if (token && token.trim() !== "") {
+		try {
+			const decoded = (await jwt.verify(
+				token,
+				process.env.SECRET_TOKEN as string,
+			)) as {
+				id: string;
+			};
+
+			return decoded.id;
+		} catch (error) {
+			throw new ApiError({
+				statusCode: 401,
+				message: "Unauthorized: Invalid or expired token",
+			});
+		}
+	}
+};

@@ -8,6 +8,7 @@ export const getUserSchema = z.object({
 			.positive("Limit must be a positive number")
 			.max(100, "Limit cannot exceed 100 items per page")
 			.default(10),
+		scope: z.enum(["global", "user"]).default("global"),
 	}),
 });
 
