@@ -1,7 +1,6 @@
 import { Model as mongooseModel, Types } from "mongoose";
 import { ApiResponse } from "./apiResponse";
 import { ApiError } from "./apiError";
-import jwt from "jsonwebtoken";
 import { verifyJwtSecret } from "../models/api.models/user.model";
 
 type Props<T> = {
@@ -13,14 +12,10 @@ type Props<T> = {
 const factoryFun = <T>({ Model, ModelName, SearchField }: Props<T>) => {
 	return {
 		getData: async (limit: number, authHeader: string, scope: string) => {
-			console.log("one");
-			let query: Record<string, any> = {};
+			let developerId: Types.ObjectId | null = null;
 
 			if (scope === "user") {
-				console.log("two");
-
 				if (!authHeader || !authHeader.startsWith("Bearer ")) {
-					console.log("three");
 					throw new ApiError({
 						statusCode: 401,
 						message: "Unauthorized: User scope requires a valid secret token",
@@ -28,15 +23,13 @@ const factoryFun = <T>({ Model, ModelName, SearchField }: Props<T>) => {
 				}
 
 				const token = authHeader.split(" ")[1];
-				console.log("four");
 
-				const id = await verifyJwtSecret(token as string);
-
-				query.developerId = id;
+				developerId = await verifyJwtSecret(token as string);
 			}
-			console.log("five");
 
-			const data = await Model.find(query)
+			const data = await Model.find({
+				developerId,
+			})
 				.limit(limit)
 				.select("-isGlobal -developerId -__v");
 
@@ -55,7 +48,9 @@ const factoryFun = <T>({ Model, ModelName, SearchField }: Props<T>) => {
 		},
 
 		findById: async (id: string) => {
-			const data = await Model.findById(id);
+			const data = await Model.findById(id).select(
+				"-isGlobal -developerId -__v",
+			);
 
 			if (!data) {
 				throw new ApiError({
@@ -73,13 +68,35 @@ const factoryFun = <T>({ Model, ModelName, SearchField }: Props<T>) => {
 			return response;
 		},
 
-		search: async (q: string, limit: number) => {
+		search: async (
+			limit: number,
+			authHeader: string,
+			scope: string,
+			q: string,
+		) => {
+			let developerId: Types.ObjectId | null = null;
+			if (scope === "user") {
+				if (!authHeader || !authHeader.startsWith("Bearer ")) {
+					throw new ApiError({
+						statusCode: 401,
+						message: "Unauthorized: User scope requires a valid secret token",
+					});
+				}
+
+				const token = authHeader.split(" ")[1];
+
+				developerId = await verifyJwtSecret(token as string);
+			}
+
 			const data = await Model.find({
+				developerId,
 				[SearchField]: {
 					$regex: q,
 					$options: "i",
 				},
-			}).limit(limit);
+			})
+				.limit(limit)
+				.select("-isGlobal -developerId -__v");
 
 			if (!data || data.length === 0) {
 				throw new ApiError({
@@ -91,20 +108,28 @@ const factoryFun = <T>({ Model, ModelName, SearchField }: Props<T>) => {
 			const response = ApiResponse({
 				data: data,
 				statusCode: 200,
-				message: `${ModelName} search success`,
+				message: `${ModelName}s search success`,
 			});
 
 			return response;
 		},
 
-		// fake delete for global data
-		delete: async (id: string) => {
-			const data = Model.findById(id);
+		delete: async (authHeader: string, id: string) => {
+			const data = await Model.findById(id);
 			if (!data) {
 				throw new ApiError({
 					statusCode: 404,
 					message: `${ModelName} not found`,
 				});
+			}
+			if (authHeader && authHeader.startsWith("Bearer ")) {
+				const token = authHeader.split(" ")[1];
+
+				const developerId = await verifyJwtSecret(token as string);
+
+				if (data.developerId.equals(developerId)) {
+					await Model.findByIdAndDelete(id);
+				}
 			}
 
 			const response = ApiResponse({

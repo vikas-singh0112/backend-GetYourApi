@@ -1,5 +1,4 @@
-import jwt from "jsonwebtoken";
-import User from "../models/api.models/user.model";
+import User, { verifyJwtSecret } from "../models/api.models/user.model";
 import {
 	createUserSchema,
 	deleteUserSchema,
@@ -36,9 +35,10 @@ export const findUsersById = asyncHandler(async (req, res) => {
 });
 
 export const searchUser = asyncHandler(async (req, res) => {
-	const { q, limit } = searchUserSchema.shape.query.parse(req.query);
+	const { q, limit, scope } = searchUserSchema.shape.query.parse(req.query);
+	const authHeader = req.headers.authorization;
 
-	const data = await userService.search(q, limit);
+	const data = await userService.search(limit, authHeader as string, scope, q);
 
 	return res.status(200).json(data);
 });
@@ -46,7 +46,8 @@ export const searchUser = asyncHandler(async (req, res) => {
 export const deleteUser = asyncHandler(async (req, res) => {
 	const { id } = deleteUserSchema.shape.query.parse(req.query);
 
-	const data = await userService.delete(id);
+	const authHeader = req.headers.authorization;
+	const data = await userService.delete(authHeader as string, id);
 
 	return res.status(200).json(data);
 });
@@ -67,27 +68,36 @@ export const createUser = asyncHandler(async (req, res) => {
 			});
 		}
 		if (existingUser.userName === userData.userName) {
-			throw new ApiError({statusCode:400,message: "This username is already taken"});
+			throw new ApiError({
+				statusCode: 400,
+				message: "This username is already taken",
+			});
 		}
 	}
 
 	if (authHeader && authHeader.startsWith("Bearer ")) {
-		const token = authHeader.replace("Bearer ", "");
-		const decoded = jwt.verify(token, process.env.SECRET_TOKEN as string) as {
-			id: string;
-		};
-
+		const token = authHeader.split(" ")[1];
+		const id = await verifyJwtSecret(token as string);
+		if (!id) {
+			throw new ApiError({
+				statusCode: 401,
+				message: "Unauthorized: Invalid or missing token",
+			});
+		}
 		const alreadyCreated = await User.find({
-			developerId: decoded.id,
+			developerId: id,
 		});
 
 		if (alreadyCreated.length >= 10) {
-			throw new ApiError({statusCode:400,message: "already created 10 users "});
+			throw new ApiError({
+				statusCode: 400,
+				message: "already created 10 users ",
+			});
 		}
 
 		const newUser = await User.create({
 			...userData,
-			developerId: decoded.id,
+			developerId: id,
 			isGlobal: false,
 		});
 
@@ -103,7 +113,7 @@ export const createUser = asyncHandler(async (req, res) => {
 		return res.status(201).json(data);
 	}
 
-	// if not existing user create a fake response and send the user data
+	// fake response and send the user data
 	const data = ApiResponse({
 		data: userData,
 		statusCode: 201,

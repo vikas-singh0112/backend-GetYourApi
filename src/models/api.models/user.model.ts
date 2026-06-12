@@ -123,21 +123,20 @@ const User: Model<IUser> =
 export default User;
 
 export const verifyJwtSecret = async (token: string) => {
-	if (token && token.trim() !== "") {
-		try {
-			const decoded = (await jwt.verify(
-				token,
-				process.env.SECRET_TOKEN as string,
-			)) as {
-				id: string;
-			};
+	if (!token || token.trim() === "") {
+		return null;
+	}
 
-			return decoded.id;
-		} catch (error) {
-			throw new ApiError({
-				statusCode: 401,
-				message: "Unauthorized: Invalid or expired token",
-			});
-		}
+	try {
+		const decoded = jwt.verify(token, process.env.SECRET_TOKEN as string) as {
+			id: string;
+		};
+
+		return new Types.ObjectId(decoded.id);
+	} catch (error) {
+		throw new ApiError({
+			statusCode: 401,
+			message: "Unauthorized: Invalid or expired token",
+		});
 	}
 };

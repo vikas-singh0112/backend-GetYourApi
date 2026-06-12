@@ -32,6 +32,7 @@ export const searchUserSchema = z.object({
 		q: z
 			.string({ message: "Search text must be a string" })
 			.min(1, "Search text must be at least 1 letter"),
+		scope: z.enum(["global", "user"]).default("global"),
 	}),
 });
 
@@ -51,7 +52,7 @@ export const createUserSchema = z.object({
 	}),
 });
 
-export type CreateUserBody = z.infer<typeof createUserSchema>["body"];
+// export type CreateUserBody = z.infer<typeof createUserSchema>["body"];
 
 export const deleteUserSchema = z.object({
 	query: z.object({
