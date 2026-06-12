@@ -2,7 +2,6 @@ import mongoose, {
 	Document,
 	model,
 	Model,
-	ObjectId,
 	Schema,
 	Types,
 } from "mongoose";
@@ -34,7 +33,7 @@ const userSchema = new Schema<IUser>(
 			required: [true, "name is required"],
 			trim: true,
 			lowercase: true,
-			maxlength: [50, "full name cannot exceed 50 characters"],
+			maxlength: [50, "name cannot exceed 50 characters"],
 			index: true,
 		},
 		userName: {
@@ -105,6 +104,8 @@ const userSchema = new Schema<IUser>(
 		developerId: {
 			type: Schema.Types.ObjectId,
 			ref: "Consumer",
+			required: true,
+			default: null,
 		},
 	},
 	{ timestamps: true },
@@ -122,6 +123,10 @@ const User: Model<IUser> =
 	mongoose.models.User || model<IUser>("User", userSchema);
 export default User;
 
+
+
+
+// jwt for developerId
 export const verifyJwtSecret = async (token: string) => {
 	if (!token || token.trim() === "") {
 		return null;

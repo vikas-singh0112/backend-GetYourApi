@@ -2,7 +2,7 @@ import User, { verifyJwtSecret } from "../models/api.models/user.model";
 import {
 	createUserSchema,
 	deleteUserSchema,
-	findByIdSchema,
+	findUserByIdSchema,
 	getUserSchema,
 	searchUserSchema,
 } from "../schemas/user.schema";
@@ -27,7 +27,7 @@ export const getUsers = asyncHandler(async (req, res) => {
 });
 
 export const findUsersById = asyncHandler(async (req, res) => {
-	const { id } = findByIdSchema.shape.query.parse(req.query);
+	const { id } = findUserByIdSchema.shape.query.parse(req.query);
 
 	const data = await userService.findById(id);
 

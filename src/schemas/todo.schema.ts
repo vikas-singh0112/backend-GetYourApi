@@ -1,6 +1,6 @@
 import z from "zod";
 
-export const getUserSchema = z.object({
+export const getTodoSchema = z.object({
 	query: z.object({
 		limit: z.coerce
 			.number("Limit must be a valid number")
@@ -12,7 +12,7 @@ export const getUserSchema = z.object({
 	}),
 });
 
-export const findUserByIdSchema = z.object({
+export const findTodoByIdSchema = z.object({
 	query: z.object({
 		id: z
 			.string("Id must be a hexadecimal string")
@@ -20,7 +20,7 @@ export const findUserByIdSchema = z.object({
 	}),
 });
 
-export const searchUserSchema = z.object({
+export const searchTodoSchema = z.object({
 	query: z.object({
 		limit: z.coerce
 			.number({ message: "Limit must be a valid number" })
@@ -36,28 +36,17 @@ export const searchUserSchema = z.object({
 	}),
 });
 
-export const createUserSchema = z.object({
-	body: z.object({
-		fullName: z.string().min(1, "Name is required").max(50),
-		userName: z.string().min(1, "Username is required").max(50),
-		email: z.email("Invalid email address").max(30),
-		phoneNumber: z.string({ message: "Phone number is required" }),
-		role: z.string().max(10),
-		birthDate: z.coerce.date(),
-		address: z.string().max(300),
-		city: z.string().max(30),
-		state: z.string().max(30),
-		country: z.string().max(30),
-		zipCode: z.string().max(6),
-	}),
-});
-
-// export type CreateUserBody = z.infer<typeof createUserSchema>["body"];
-
-export const deleteUserSchema = z.object({
+export const deleteTodoSchema = z.object({
 	query: z.object({
 		id: z
 			.string("Id is required to delete a user")
 			.min(24, "Id must be 24 long hexadecimal string"),
+	}),
+});
+
+export const createTodoSchema = z.object({
+	body: z.object({
+		title: z.string().min(1, "title is required").max(50),
+		content: z.string().min(1, "content is required").max(1000),
 	}),
 });
