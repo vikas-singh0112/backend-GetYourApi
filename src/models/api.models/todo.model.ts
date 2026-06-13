@@ -22,7 +22,6 @@ const todoSchema = new Schema<ITodo>(
 			trim: true,
 			lowercase: true,
 			maxLength: [50, "title cannot exceed 50 characters"],
-			index: true,
 		},
 		content: {
 			type: String,
@@ -57,6 +56,7 @@ const todoSchema = new Schema<ITodo>(
 	},
 	{ timestamps: true },
 );
+
 
 todoSchema.pre("save", async function () {
 	if (!this.isModified("title")) return;

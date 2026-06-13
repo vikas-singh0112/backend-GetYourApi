@@ -19,18 +19,23 @@ const userService = factoryFun({
 });
 
 export const getUsers = asyncHandler(async (req, res) => {
-	const { limit, scope,page } = getUserSchema.shape.query.parse(req.query);
+	const { limit, scope, page } = getUserSchema.shape.query.parse(req.query);
 	const authHeader = req.headers.authorization;
 
-	const data = await userService.getData(limit, authHeader as string, scope, page);
+	const data = await userService.getData(
+		limit,
+		authHeader as string,
+		scope,
+		page,
+	);
 
 	return res.status(200).json(data);
 });
 
 export const findUsersById = asyncHandler(async (req, res) => {
-	const { id } = findUserByIdSchema.shape.query.parse(req.query);
+	const { userid } = findUserByIdSchema.shape.params.parse(req.params);
 
-	const data = await userService.findById(id);
+	const data = await userService.findById(userid);
 
 	return res.status(200).json(data);
 });
@@ -44,10 +49,18 @@ export const findUsersBySlug = asyncHandler(async (req, res) => {
 });
 
 export const searchUser = asyncHandler(async (req, res) => {
-	const { q, limit, scope,page } = searchUserSchema.shape.query.parse(req.query);
+	const { q, limit, scope, page } = searchUserSchema.shape.query.parse(
+		req.query,
+	);
 	const authHeader = req.headers.authorization;
 
-	const data = await userService.search(limit, authHeader as string, scope, q, page);
+	const data = await userService.search(
+		limit,
+		authHeader as string,
+		scope,
+		q,
+		page,
+	);
 
 	return res.status(200).json(data);
 });

@@ -20,17 +20,17 @@ app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 
 app.use(express.static("public"));
 
-
 // route imports
 import authRouter from "./routes/auth.routes";
 import userRouter from "./routes/user.routes";
 import todoRouter from "./routes/todo.route";
+import productRouter from "./routes/product.route";
 
 // route initialize
 app.use("/api/auth", authRouter);
 app.use("/api/users", userRouter);
 app.use("/api/todos", todoRouter);
-
+app.use("/api/products", productRouter);
 
 // global error handler
 app.use(globalErrorHandler);

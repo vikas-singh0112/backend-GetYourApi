@@ -30,7 +30,6 @@ const userSchema = new Schema<IUser>(
 			trim: true,
 			lowercase: true,
 			maxlength: [50, "name cannot exceed 50 characters"],
-			index: true,
 		},
 		userName: {
 			type: String,
@@ -39,7 +38,6 @@ const userSchema = new Schema<IUser>(
 			trim: true,
 			lowercase: true,
 			maxlength: [50, "username cannot exceed 50 characters"],
-			index: true,
 		},
 		slug: {
 			type: String,
@@ -114,13 +112,7 @@ const userSchema = new Schema<IUser>(
 	{ timestamps: true },
 );
 
-userSchema.index(
-	{ createdAt: 1 },
-	{
-		expireAfterSeconds: 86400, // 24 hours
-		partialFilterExpression: { isGlobal: false }, // Only apply to temporary users
-	},
-);
+
 
 userSchema.pre("save", async function () {
 	if (!this.isModified("fullName")) return;

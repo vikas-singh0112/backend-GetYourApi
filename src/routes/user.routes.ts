@@ -11,7 +11,7 @@ import {
 const userRouter = Router();
 
 userRouter.get("", getUsers);
-userRouter.get("/find-by-id", findUsersById);
+userRouter.get("/id/:userid", findUsersById);
 userRouter.get("/search", searchUser);
 userRouter.get("/name/:slug", findUsersBySlug);
 userRouter.post("/create", createUser);

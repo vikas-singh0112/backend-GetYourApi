@@ -34,9 +34,9 @@ export const getTodos = asyncHandler(async (req, res) => {
 });
 
 export const findTodoById = asyncHandler(async (req, res) => {
-	const { id } = findTodoByIdSchema.shape.query.parse(req.query);
+	const { todoid } = findTodoByIdSchema.shape.params.parse(req.params);
 
-	const data = await todoService.findById(id);
+	const data = await todoService.findById(todoid);
 
 	return res.status(200).json(data);
 });
@@ -95,7 +95,7 @@ export const createTodo = asyncHandler(async (req, res) => {
 		if (alreadyCreated.length >= 10) {
 			throw new ApiError({
 				statusCode: 400,
-				message: "already created 10 users ",
+				message: "already created 10 todos ",
 			});
 		}
 

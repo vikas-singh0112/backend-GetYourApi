@@ -10,7 +10,7 @@ import {
 
 const todoRouter = Router();
 todoRouter.get("", getTodos);
-todoRouter.get("/find-by-id", findTodoById);
+todoRouter.get("/id/:todoid", findTodoById);
 todoRouter.get("/search", searchTodo);
 todoRouter.get("/title/:slug", findTodoBySlug);
 todoRouter.post("/create", createTodo);

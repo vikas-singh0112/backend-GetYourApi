@@ -1,5 +1,5 @@
 import { Router } from "express";
-import passport from "../config/passport";
+import passport from "../config/passport.config";
 import {
 	googleCallback,
     getCurrentConsumer,
