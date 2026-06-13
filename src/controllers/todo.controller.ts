@@ -1,6 +1,13 @@
 import Todo from "../models/api.models/todo.model";
 import { verifyJwtSecret } from "../models/api.models/user.model";
-import { createTodoSchema, deleteTodoSchema, findTodoByIdSchema, getTodoSchema, searchTodoSchema } from "../schemas/todo.schema";
+import {
+	createTodoSchema,
+	deleteTodoSchema,
+	findTodoByIdSchema,
+	findTodoBySlugSchema,
+	getTodoSchema,
+	searchTodoSchema,
+} from "../schemas/todo.schema";
 import { ApiError } from "../utils/apiError";
 import { ApiResponse } from "../utils/apiResponse";
 import asyncHandler from "../utils/asyncHandler";
@@ -9,16 +16,19 @@ import factoryFun from "../utils/factory";
 const todoService = factoryFun({
 	Model: Todo,
 	ModelName: "Todo",
-	SearchField: "title",
+	SearchField: "slug",
 });
 
-
-
 export const getTodos = asyncHandler(async (req, res) => {
-	const { limit, scope } = getTodoSchema.shape.query.parse(req.query);
+	const { limit, scope, page } = getTodoSchema.shape.query.parse(req.query);
 	const authHeader = req.headers.authorization;
 
-	const data = await todoService.getData(limit, authHeader as string, scope);
+	const data = await todoService.getData(
+		limit,
+		authHeader as string,
+		scope,
+		page,
+	);
 
 	return res.status(200).json(data);
 });
@@ -31,11 +41,27 @@ export const findTodoById = asyncHandler(async (req, res) => {
 	return res.status(200).json(data);
 });
 
+export const findTodoBySlug = asyncHandler(async (req, res) => {
+	const { slug } = findTodoBySlugSchema.shape.params.parse(req.params);
+
+	const data = await todoService.findBySlug(slug);
+
+	return res.status(200).json(data);
+});
+
 export const searchTodo = asyncHandler(async (req, res) => {
-	const { q, limit, scope } = searchTodoSchema.shape.query.parse(req.query);
+	const { q, limit, scope, page } = searchTodoSchema.shape.query.parse(
+		req.query,
+	);
 	const authHeader = req.headers.authorization;
 
-	const data = await todoService.search(limit, authHeader as string, scope, q);
+	const data = await todoService.search(
+		limit,
+		authHeader as string,
+		scope,
+		q,
+		page,
+	);
 
 	return res.status(200).json(data);
 });

@@ -3,6 +3,7 @@ import {
 	createUserSchema,
 	deleteUserSchema,
 	findUserByIdSchema,
+	findUserBySlugSchema,
 	getUserSchema,
 	searchUserSchema,
 } from "../schemas/user.schema";
@@ -14,14 +15,14 @@ import factoryFun from "../utils/factory";
 const userService = factoryFun({
 	Model: User,
 	ModelName: "User",
-	SearchField: "fullName",
+	SearchField: "slug",
 });
 
 export const getUsers = asyncHandler(async (req, res) => {
-	const { limit, scope } = getUserSchema.shape.query.parse(req.query);
+	const { limit, scope,page } = getUserSchema.shape.query.parse(req.query);
 	const authHeader = req.headers.authorization;
 
-	const data = await userService.getData(limit, authHeader as string, scope);
+	const data = await userService.getData(limit, authHeader as string, scope, page);
 
 	return res.status(200).json(data);
 });
@@ -34,11 +35,19 @@ export const findUsersById = asyncHandler(async (req, res) => {
 	return res.status(200).json(data);
 });
 
+export const findUsersBySlug = asyncHandler(async (req, res) => {
+	const { slug } = findUserBySlugSchema.shape.params.parse(req.params);
+
+	const data = await userService.findBySlug(slug);
+
+	return res.status(200).json(data);
+});
+
 export const searchUser = asyncHandler(async (req, res) => {
-	const { q, limit, scope } = searchUserSchema.shape.query.parse(req.query);
+	const { q, limit, scope,page } = searchUserSchema.shape.query.parse(req.query);
 	const authHeader = req.headers.authorization;
 
-	const data = await userService.search(limit, authHeader as string, scope, q);
+	const data = await userService.search(limit, authHeader as string, scope, q, page);
 
 	return res.status(200).json(data);
 });

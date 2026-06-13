@@ -11,7 +11,12 @@ type Props<T> = {
 
 const factoryFun = <T>({ Model, ModelName, SearchField }: Props<T>) => {
 	return {
-		getData: async (limit: number, authHeader: string, scope: string) => {
+		getData: async (
+			limit: number,
+			authHeader: string,
+			scope: string,
+			page: number,
+		) => {
 			let developerId: Types.ObjectId | null = null;
 
 			if (scope === "user") {
@@ -27,11 +32,17 @@ const factoryFun = <T>({ Model, ModelName, SearchField }: Props<T>) => {
 				developerId = await verifyJwtSecret(token as string);
 			}
 
-			const data = await Model.find({
-				developerId,
-			})
-				.limit(limit)
-				.select("-isGlobal -developerId -__v");
+			const skip = (page - 1) * limit;
+
+			const [data, totalItems] = await Promise.all([
+				Model.find({
+					developerId,
+				})
+					.skip(skip)
+					.limit(limit)
+					.select("-isGlobal -developerId -__v"),
+				Model.countDocuments({ developerId }),
+			]);
 
 			if (!data || data.length === 0) {
 				throw new ApiError({
@@ -40,10 +51,26 @@ const factoryFun = <T>({ Model, ModelName, SearchField }: Props<T>) => {
 				});
 			}
 
+			const totalPages = Math.ceil(totalItems / limit);
+			const hasNextPage = page < totalPages;
+			const hasPrevPage = page > 1;
+
 			return ApiResponse({
-				data,
+				data: {
+					[`${ModelName.toLowerCase()}s`]: data,
+					pagination: {
+						totalItems,
+						totalPages,
+						currentPage: page,
+						limit,
+						hasNextPage,
+						hasPrevPage,
+						nextPage: hasNextPage ? page + 1 : null,
+						prevPage: hasPrevPage ? page - 1 : null,
+					},
+				},
 				statusCode: 200,
-				message: `${ModelName} fetched successfully`,
+				message: `${ModelName}s fetched successfully`,
 			});
 		},
 
@@ -68,11 +95,32 @@ const factoryFun = <T>({ Model, ModelName, SearchField }: Props<T>) => {
 			return response;
 		},
 
+		findBySlug: async (slug: string) => {
+			const data = await Model.findOne({ slug: slug }).select(
+				"-isGlobal -developerId -__v",
+			);
+			if (!data) {
+				throw new ApiError({
+					statusCode: 404,
+					message: `${ModelName} not found`,
+				});
+			}
+
+			const response = ApiResponse({
+				data: data,
+				statusCode: 200,
+				message: `${ModelName} fetched successfully`,
+			});
+
+			return response;
+		},
+
 		search: async (
 			limit: number,
 			authHeader: string,
 			scope: string,
 			q: string,
+			page: number,
 		) => {
 			let developerId: Types.ObjectId | null = null;
 			if (scope === "user") {
@@ -88,15 +136,24 @@ const factoryFun = <T>({ Model, ModelName, SearchField }: Props<T>) => {
 				developerId = await verifyJwtSecret(token as string);
 			}
 
-			const data = await Model.find({
-				developerId,
-				[SearchField]: {
-					$regex: q,
-					$options: "i",
-				},
-			})
-				.limit(limit)
-				.select("-isGlobal -developerId -__v");
+			const skip = (page - 1) * limit;
+
+			const sanitizedQuery = q.replace(" ", "-");
+
+			const [data, totalItems] = await Promise.all([
+				Model.find({
+					developerId,
+					[SearchField]: {
+						$regex: sanitizedQuery,
+						$options: "i",
+					},
+				})
+					.skip(skip)
+					.limit(limit)
+					.select("-isGlobal -developerId -__v"),
+
+				Model.countDocuments({ developerId }),
+			]);
 
 			if (!data || data.length === 0) {
 				throw new ApiError({
@@ -105,8 +162,24 @@ const factoryFun = <T>({ Model, ModelName, SearchField }: Props<T>) => {
 				});
 			}
 
+			const totalPages = Math.ceil(totalItems / limit);
+			const hasNextPage = page < totalPages;
+			const hasPrevPage = page > 1;
+
 			const response = ApiResponse({
-				data: data,
+				data: {
+					[`${ModelName.toLowerCase()}s`]: data,
+					pagination: {
+						totalItems,
+						totalPages,
+						currentPage: page,
+						limit,
+						hasNextPage,
+						hasPrevPage,
+						nextPage: hasNextPage ? page + 1 : null,
+						prevPage: hasPrevPage ? page - 1 : null,
+					},
+				},
 				statusCode: 200,
 				message: `${ModelName}s search success`,
 			});

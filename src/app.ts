@@ -1,6 +1,7 @@
-import express, { Request, Response } from "express";
+import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import { globalErrorHandler } from "./middlewares/globalError";
 
 const app = express();
 
@@ -19,15 +20,19 @@ app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 
 app.use(express.static("public"));
 
+
 // route imports
-
-import userRouter from "./routes/user.routes";
 import authRouter from "./routes/auth.routes";
-import { globalErrorHandler } from "./middlewares/globalError";
+import userRouter from "./routes/user.routes";
+import todoRouter from "./routes/todo.route";
 
-app.use("/api/users", userRouter);
+// route initialize
 app.use("/api/auth", authRouter);
+app.use("/api/users", userRouter);
+app.use("/api/todos", todoRouter);
 
+
+// global error handler
 app.use(globalErrorHandler);
 
 export { app };

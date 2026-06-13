@@ -2,13 +2,9 @@ import z from "zod";
 
 export const getTodoSchema = z.object({
 	query: z.object({
-		limit: z.coerce
-			.number("Limit must be a valid number")
-			.int("Limit must be a whole number")
-			.positive("Limit must be a positive number")
-			.max(100, "Limit cannot exceed 100 items per page")
-			.default(10),
+		limit: z.coerce.number().int().positive().max(50).default(20),
 		scope: z.enum(["global", "user"]).default("global"),
+		page: z.coerce.number().int().positive().default(1),
 	}),
 });
 
@@ -20,26 +16,27 @@ export const findTodoByIdSchema = z.object({
 	}),
 });
 
+export const findTodoBySlugSchema = z.object({
+	params: z.object({
+		slug: z.string().min(1),
+	}),
+});
+
 export const searchTodoSchema = z.object({
 	query: z.object({
-		limit: z.coerce
-			.number({ message: "Limit must be a valid number" })
-			.int("Limit must be a whole number")
-			.positive("Limit must be a positive number")
-			.max(100, "Limit cannot exceed 100 items per page")
-			.default(10),
-
+		limit: z.coerce.number().int().positive().max(50).default(20),
 		q: z
 			.string({ message: "Search text must be a string" })
 			.min(1, "Search text must be at least 1 letter"),
 		scope: z.enum(["global", "user"]).default("global"),
+		page: z.coerce.number().int().positive().default(1),
 	}),
 });
 
 export const deleteTodoSchema = z.object({
 	query: z.object({
 		id: z
-			.string("Id is required to delete a user")
+			.string("Id is required to delete a todo")
 			.min(24, "Id must be 24 long hexadecimal string"),
 	}),
 });

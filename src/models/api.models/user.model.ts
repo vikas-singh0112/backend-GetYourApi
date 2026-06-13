@@ -1,16 +1,12 @@
-import mongoose, {
-	Document,
-	model,
-	Model,
-	Schema,
-	Types,
-} from "mongoose";
+import mongoose, { Document, model, Model, Schema, Types } from "mongoose";
 import jwt from "jsonwebtoken";
 import { ApiError } from "../../utils/apiError";
+import crypto from "crypto";
 
 export interface IUser extends Document {
 	fullName: string;
 	userName: string;
+	slug: string;
 	email: string;
 	phoneNumber: string;
 	role: string;
@@ -43,6 +39,13 @@ const userSchema = new Schema<IUser>(
 			trim: true,
 			lowercase: true,
 			maxlength: [50, "username cannot exceed 50 characters"],
+			index: true,
+		},
+		slug: {
+			type: String,
+			unique: true,
+			lowercase: true,
+			trim: true,
 			index: true,
 		},
 
@@ -119,12 +122,24 @@ userSchema.index(
 	},
 );
 
+userSchema.pre("save", async function () {
+	if (!this.isModified("fullName")) return;
+
+	let generatedSlug = this.fullName
+		.toString()
+		.toLowerCase()
+		.trim()
+		.replace(/[^a-z0-9 -]/g, "")
+		.replace(/\s+/g, "-")
+		.replace(/-+/g, "-");
+
+	const shortHash = crypto.randomBytes(3).toString("hex");
+	this.slug = `${generatedSlug}-${shortHash}`;
+});
+
 const User: Model<IUser> =
 	mongoose.models.User || model<IUser>("User", userSchema);
 export default User;
-
-
-
 
 // jwt for developerId
 export const verifyJwtSecret = async (token: string) => {

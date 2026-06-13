@@ -2,13 +2,9 @@ import z from "zod";
 
 export const getUserSchema = z.object({
 	query: z.object({
-		limit: z.coerce
-			.number("Limit must be a valid number")
-			.int("Limit must be a whole number")
-			.positive("Limit must be a positive number")
-			.max(100, "Limit cannot exceed 100 items per page")
-			.default(10),
+		limit: z.coerce.number().int().positive().max(50).default(20),
 		scope: z.enum(["global", "user"]).default("global"),
+		page: z.coerce.number().int().positive().default(1),
 	}),
 });
 
@@ -20,19 +16,26 @@ export const findUserByIdSchema = z.object({
 	}),
 });
 
+export const findUserBySlugSchema = z.object({
+	params: z.object({
+		slug: z.string().min(1),
+	}),
+});
+
 export const searchUserSchema = z.object({
 	query: z.object({
 		limit: z.coerce
 			.number({ message: "Limit must be a valid number" })
 			.int("Limit must be a whole number")
 			.positive("Limit must be a positive number")
-			.max(100, "Limit cannot exceed 100 items per page")
-			.default(10),
+			.max(50, "Limit cannot exceed 50 items per page")
+			.default(20),
 
 		q: z
 			.string({ message: "Search text must be a string" })
 			.min(1, "Search text must be at least 1 letter"),
 		scope: z.enum(["global", "user"]).default("global"),
+		page: z.coerce.number().int().positive().default(1),
 	}),
 });
 

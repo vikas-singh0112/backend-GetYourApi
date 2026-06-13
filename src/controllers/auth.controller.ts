@@ -35,7 +35,7 @@ export const googleCallback = (req: Request, res: Response): void => {
 export const getCurrentConsumer = async (
 	req: Request,
 	res: Response,
-): Promise<Response> => {
+	): Promise<Response> => {
 	const token = req.cookies?.auth_token;
 
 	if (!token) {
