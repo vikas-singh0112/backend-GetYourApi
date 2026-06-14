@@ -1,16 +1,35 @@
 import express from "express";
-import cors from "cors";
+import cors, { CorsOptions } from "cors";
 import cookieParser from "cookie-parser";
 import { globalErrorHandler } from "./middlewares/globalError";
 
 const app = express();
 
-app.use(
-	cors({
-		origin: process.env.CORS_ORIGIN,
-		credentials: true,
-	}),
-);
+const frontendOrigins = (process.env.FRONTEND_ORIGINS || "")
+	.split(",")
+	.map((o) => o.trim())
+	.filter(Boolean);
+
+const authCors: CorsOptions = {
+	origin: (origin, cb) => {
+		// allow non-browser clients (no Origin header)
+		if (!origin) return cb(null, true);
+		if (frontendOrigins.includes(origin)) return cb(null, true);
+		return cb(new Error("CORS blocked"), false);
+	},
+	credentials: true,
+	methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+	allowedHeaders: ["Content-Type", "Authorization"],
+	maxAge: 86400,
+};
+
+const publicCors: CorsOptions = {
+	origin: "*",
+	credentials: false,
+	methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+	allowedHeaders: ["Content-Type", "Authorization"],
+	maxAge: 86400,
+};
 
 app.use(cookieParser());
 
@@ -27,10 +46,13 @@ import todoRouter from "./routes/todo.route";
 import productRouter from "./routes/product.route";
 
 // route initialize
-app.use("/api/auth", authRouter);
-app.use("/api/users", userRouter);
-app.use("/api/todos", todoRouter);
-app.use("/api/products", productRouter);
+// auth
+app.use("/api/auth", cors(authCors), authRouter);
+
+// non auth routes
+app.use("/api/users", cors(publicCors), userRouter);
+app.use("/api/todos", cors(publicCors), todoRouter);
+app.use("/api/products", cors(publicCors), productRouter);
 
 // global error handler
 app.use(globalErrorHandler);
