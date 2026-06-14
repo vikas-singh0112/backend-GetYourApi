@@ -2,14 +2,27 @@ import { Model as mongooseModel, Types } from "mongoose";
 import { ApiResponse } from "./apiResponse";
 import { ApiError } from "./apiError";
 import { verifyJwtSecret } from "../models/api.models/user.model";
+import { v2 as cloudinary } from "cloudinary";
 
-type Props<T> = {
+interface CloudinaryImage {
+	publicId: string;
+	url?: string;
+}
+type Props<
+	T extends { developerId: Types.ObjectId; images?: CloudinaryImage[] },
+> = {
 	Model: mongooseModel<T>;
 	ModelName: string;
 	SearchField: keyof T;
 };
 
-const factoryFun = <T>({ Model, ModelName, SearchField }: Props<T>) => {
+const factoryFun = <
+	T extends { developerId: Types.ObjectId; images?: CloudinaryImage[] },
+>({
+	Model,
+	ModelName,
+	SearchField,
+}: Props<T>) => {
 	return {
 		getData: async (
 			limit: number,
@@ -195,12 +208,30 @@ const factoryFun = <T>({ Model, ModelName, SearchField }: Props<T>) => {
 					message: `${ModelName} not found`,
 				});
 			}
+
 			if (authHeader && authHeader.startsWith("Bearer ")) {
 				const token = authHeader.split(" ")[1];
 
 				const developerId = await verifyJwtSecret(token as string);
 
+				const publicIdsToDelete: string[] = [];
+
+				if (data.images) {
+					if (data.images && Array.isArray(data.images)) {
+						data.images.forEach((img: any) => {
+							if (img.publicId) publicIdsToDelete.push(img.publicId);
+						});
+					}
+				}
+
 				if (data.developerId.equals(developerId)) {
+					// Batch delete the images from Cloudinary
+					if (publicIdsToDelete.length > 0) {
+						console.log(
+							` -> Removing ${publicIdsToDelete.length} images from Cloudinary...`,
+						);
+						await cloudinary.api.delete_resources(publicIdsToDelete);
+					}
 					await Model.findByIdAndDelete(id);
 				}
 			}
