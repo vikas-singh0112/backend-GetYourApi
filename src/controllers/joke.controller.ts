@@ -1,5 +1,9 @@
-import Joke from "../models/api.models/joke.model";
-import { verifyJwtSecret } from "../models/api.models/user.model";
+import Joke from "../models/api.models/joke.model.js";
+import factoryFun from "../utils/factory.js";
+import asyncHandler from "../utils/asyncHandler.js";
+import { verifyJwtSecret } from "../models/api.models/user.model.js";
+import { ApiError } from "../utils/apiError.js";
+import { ApiResponse } from "../utils/apiResponse.js";
 import {
 	createJokeSchema,
 	deleteJokeSchema,
@@ -8,11 +12,8 @@ import {
 	findJokeBySlugSchema,
 	getJokeSchema,
 	searchJokeSchema,
-} from "../schemas/joke.schema";
-import { ApiError } from "../utils/apiError";
-import { ApiResponse } from "../utils/apiResponse";
-import asyncHandler from "../utils/asyncHandler";
-import factoryFun from "../utils/factory";
+} from "../schemas/joke.schema.js";
+
 
 const jokeService = factoryFun({
 	Model: Joke,

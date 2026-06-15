@@ -1,11 +1,11 @@
 import { Router } from "express";
-import passport from "../config/passport.config";
+import passport from "../config/passport.config.js";
 import {
 	googleCallback,
     getCurrentConsumer,
     logoutConsumer,
 	getSecretToken,
-} from "../controllers/auth.controller";
+} from "../controllers/auth.controller.js";
 
 const authRouter = Router();
 

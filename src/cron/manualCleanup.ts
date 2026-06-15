@@ -1,7 +1,7 @@
 import { Model } from "mongoose";
-import Product from "../models/api.models/product.model";
-import User from "../models/api.models/user.model";
-import Todo from "../models/api.models/todo.model";
+import Product from "../models/api.models/product.model.js";
+import User from "../models/api.models/user.model.js";
+import Todo from "../models/api.models/todo.model.js";
 import cron from "node-cron";
 import { v2 as cloudinary } from "cloudinary";
 

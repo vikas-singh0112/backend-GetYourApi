@@ -1,7 +1,7 @@
 import { Model as mongooseModel, Types } from "mongoose";
-import { ApiResponse } from "./apiResponse";
-import { ApiError } from "./apiError";
-import { verifyJwtSecret } from "../models/api.models/user.model";
+import { ApiResponse } from "./apiResponse.js";
+import { ApiError } from "./apiError.js";
+import { verifyJwtSecret } from "../models/api.models/user.model.js";
 import { v2 as cloudinary } from "cloudinary";
 
 type Props<T> = {

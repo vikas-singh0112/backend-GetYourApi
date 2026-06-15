@@ -1,5 +1,9 @@
-import Todo from "../models/api.models/todo.model";
-import { verifyJwtSecret } from "../models/api.models/user.model";
+import Todo from "../models/api.models/todo.model.js";
+import factoryFun from "../utils/factory.js";
+import asyncHandler from "../utils/asyncHandler.js";
+import { verifyJwtSecret } from "../models/api.models/user.model.js";
+import { ApiError } from "../utils/apiError.js";
+import { ApiResponse } from "../utils/apiResponse.js";
 import {
 	createTodoSchema,
 	deleteTodoSchema,
@@ -7,11 +11,8 @@ import {
 	findTodoBySlugSchema,
 	getTodoSchema,
 	searchTodoSchema,
-} from "../schemas/todo.schema";
-import { ApiError } from "../utils/apiError";
-import { ApiResponse } from "../utils/apiResponse";
-import asyncHandler from "../utils/asyncHandler";
-import factoryFun from "../utils/factory";
+} from "../schemas/todo.schema.js";
+
 
 const todoService = factoryFun({
 	Model: Todo,

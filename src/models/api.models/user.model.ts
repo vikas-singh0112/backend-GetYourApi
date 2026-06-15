@@ -1,6 +1,6 @@
 import mongoose, { Document, model, Model, Schema, Types } from "mongoose";
 import jwt from "jsonwebtoken";
-import { ApiError } from "../../utils/apiError";
+import { ApiError } from "../../utils/apiError.js";
 import crypto from "crypto";
 
 export interface IUser extends Document {

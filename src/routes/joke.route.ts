@@ -7,7 +7,7 @@ import {
 	findJokeBySlug,
 	getJokes,
 	searchJoke,
-} from "../controllers/joke.controller";
+} from "../controllers/joke.controller.js";
 
 const jokeRouter = Router();
 

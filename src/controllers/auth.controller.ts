@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import { Consumer, IConsumer } from "../models/consumer.model";
+import { Consumer, IConsumer } from "../models/consumer.model.js";
 import jwt from "jsonwebtoken";
-import asyncHandler from "../utils/asyncHandler";
-import { ApiResponse } from "../utils/apiResponse";
+import asyncHandler from "../utils/asyncHandler.js";
+import { ApiResponse } from "../utils/apiResponse.js";
 
 interface JwtPayload {
 	id: string;

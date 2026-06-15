@@ -1,6 +1,6 @@
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
-import { Consumer } from "../models/consumer.model";
+import { Consumer } from "../models/consumer.model.js";
 
 passport.use(
 	new GoogleStrategy(

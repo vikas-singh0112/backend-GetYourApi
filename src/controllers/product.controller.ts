@@ -1,7 +1,12 @@
 import fs from "fs";
-import { parseMultipartData } from "../config/multer.config";
-import Product from "../models/api.models/product.model";
-import { verifyJwtSecret } from "../models/api.models/user.model";
+import asyncHandler from "../utils/asyncHandler.js";
+import Product from "../models/api.models/product.model.js";
+import { parseMultipartData } from "../config/multer.config.js";
+import { verifyJwtSecret } from "../models/api.models/user.model.js";
+import { ApiError } from "../utils/apiError.js";
+import { ApiResponse } from "../utils/apiResponse.js";
+import { uploadToCloudinary } from "../utils/cloudinary.js";
+import factoryFun from "../utils/factory.js";
 import {
 	createProductSchema,
 	deleteProductSchema,
@@ -10,12 +15,8 @@ import {
 	findProductBySlugSchema,
 	getProductSchema,
 	searchProductSchema,
-} from "../schemas/product.schema";
-import { ApiError } from "../utils/apiError";
-import { ApiResponse } from "../utils/apiResponse";
-import asyncHandler from "../utils/asyncHandler";
-import { uploadToCloudinary } from "../utils/cloudinary";
-import factoryFun from "../utils/factory";
+} from "../schemas/product.schema.js";
+
 
 const productService = factoryFun({
 	Model: Product,

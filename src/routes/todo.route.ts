@@ -6,7 +6,7 @@ import {
 	findTodoBySlug,
 	getTodos,
 	searchTodo,
-} from "../controllers/todo.controller";
+} from "../controllers/todo.controller.js";
 
 const todoRouter = Router();
 todoRouter.get("", getTodos);

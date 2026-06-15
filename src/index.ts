@@ -1,7 +1,7 @@
 import "dotenv/config";
-import { app } from "./app";
-import connectDb from "./db/dbConnection";
-import { manualCleanupCronJob } from "./cron/manualCleanup";
+import { app } from "./app.js";
+import connectDb from "./db/dbConnection.js";
+import { manualCleanupCronJob } from "./cron/manualCleanup.js";
 
 const PORT = process.env.SERVER_PORT || 7000;
 

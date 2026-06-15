@@ -1,4 +1,8 @@
-import User, { verifyJwtSecret } from "../models/api.models/user.model";
+import User, { verifyJwtSecret } from "../models/api.models/user.model.js";
+import factoryFun from "../utils/factory.js";
+import asyncHandler from "../utils/asyncHandler.js";
+import { ApiError } from "../utils/apiError.js";
+import { ApiResponse } from "../utils/apiResponse.js";
 import {
 	createUserSchema,
 	deleteUserSchema,
@@ -7,10 +11,6 @@ import {
 	getUserSchema,
 	searchUserSchema,
 } from "../schemas/user.schema";
-import { ApiError } from "../utils/apiError";
-import { ApiResponse } from "../utils/apiResponse";
-import asyncHandler from "../utils/asyncHandler";
-import factoryFun from "../utils/factory";
 
 const userService = factoryFun({
 	Model: User,
