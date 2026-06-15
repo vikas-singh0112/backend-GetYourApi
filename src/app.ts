@@ -62,6 +62,7 @@ setInterval(async () => {
 }, 600000);
 
 // config
+app.options("*", cors(authCors));
 app.use(cookieParser());
 
 app.use(express.json({ limit: "16kb" }));
@@ -69,8 +70,6 @@ app.use(express.json({ limit: "16kb" }));
 app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 
 app.use(express.static("public"));
-
-
 
 // route initialize
 
