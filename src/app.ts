@@ -3,6 +3,7 @@ import cors, { CorsOptions } from "cors";
 import cookieParser from "cookie-parser";
 import { globalErrorHandler } from "./middlewares/globalError.js";
 import axios from "axios";
+import passport from "./config/passport.config.js";
 
 // route imports
 import authRouter from "./routes/auth.route.js";
@@ -70,6 +71,9 @@ app.use(
 );
 app.use(cookieParser());
 
+// Initialize Passport
+app.use(passport.initialize());
+
 app.use(express.json({ limit: "16kb" }));
 
 app.use(express.urlencoded({ extended: true, limit: "16kb" }));
@@ -79,7 +83,7 @@ app.use(express.static("public"));
 // route initialize
 
 // auth route
-app.use("/api/auth", cors(authCors),authRouter);
+app.use("/api/auth", cors(authCors), authRouter);
 
 // non auth routes
 app.use("/api/users", cors(publicCors), userRouter);
