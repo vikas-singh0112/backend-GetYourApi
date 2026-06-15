@@ -9,7 +9,6 @@ interface JwtPayload {
 }
 
 export const googleCallback = (req: Request, res: Response): void => {
-
 	const consumer = req.user as IConsumer;
 
 	if (!consumer) {
@@ -29,10 +28,11 @@ export const googleCallback = (req: Request, res: Response): void => {
 		secure: true,
 		maxAge: 24 * 60 * 60 * 1000, // 24 hours
 		sameSite: "none",
+		path: "/",
 	});
 
 	const successUrl = process.env.FRONTEND_ORIGINS;
-	
+
 	res.redirect(`${successUrl}/dashboard?token=${token}`);
 };
 
@@ -66,7 +66,12 @@ export const getCurrentConsumer = async (
 };
 
 export const logoutConsumer = (req: Request, res: Response): void => {
-	res.clearCookie("auth_token");
+	res.clearCookie("auth_token", {
+		httpOnly: true,
+		secure: true,
+		sameSite: "none",
+		path: "/",
+	});
 	res.json({ success: true, message: "Logged out successfully" });
 };
 
