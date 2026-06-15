@@ -10,7 +10,7 @@ import {
 	findUserBySlugSchema,
 	getUserSchema,
 	searchUserSchema,
-} from "../schemas/user.schema";
+} from "../schemas/user.schema.js";
 
 const userService = factoryFun({
 	Model: User,
