@@ -69,11 +69,15 @@ export const createTodoSchema = z.object({
 		title: z
 			.string()
 			.min(1, "title is required")
-			.max(100, "title cannot exceed 100 characters"),
+			.max(100, "title cannot exceed 100 characters")
+			.toLowerCase()
+			.trim(),
 
 		content: z
 			.string()
 			.min(1, "content is required")
-			.max(1000, "content cannot exceed 100 characters"),
+			.max(1000, "content cannot exceed 100 characters")
+			.toLowerCase()
+			.trim(),
 	}),
 });

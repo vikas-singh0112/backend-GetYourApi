@@ -61,53 +61,71 @@ export const createUserSchema = z.object({
 		fullName: z
 			.string()
 			.min(1, "Name is required")
-			.max(50, "Name cannot exceed 50 characters"),
+			.max(50, "Name cannot exceed 50 characters")
+			.toLowerCase()
+			.trim(),
 
 		userName: z
 			.string()
 			.min(1, "Username is required")
-			.max(50, "username cannot exceed 50 characters"),
+			.max(50, "username cannot exceed 50 characters")
+			.toLowerCase()
+			.trim(),
 
 		email: z
 			.email("Invalid email address")
-			.max(100, "email cannot exceed 100 characters"),
+			.max(100, "email cannot exceed 100 characters")
+			.toLowerCase()
+			.trim(),
 
 		phoneNumber: z
 			.string("Phone number is required")
 			.min(7, "phone no cannot be less than 7 numbers")
-			.max(13, "phone no cannot exceed 13 numbers"),
+			.max(13, "phone no cannot exceed 13 numbers")
+			.trim(),
 
 		role: z
 			.string()
 			.min(4, "role is required")
-			.max(20, "role cannot exceed 20characters"),
+			.max(20, "role cannot exceed 20characters")
+			.toLowerCase()
+			.trim(),
 
 		birthDate: z.coerce.date(),
 
 		address: z
 			.string("address is required")
 			.min(10, "address cannot be less than 10 characters")
-			.max(300),
+			.max(300)
+			.toLowerCase()
+			.trim(),
 
 		city: z
 			.string()
 			.min(1, "city is required")
-			.max(50, "city cannot exceed 50 characters"),
+			.max(50, "city cannot exceed 50 characters")
+			.toLowerCase()
+			.trim(),
 
 		state: z
 			.string()
 			.min(1, "state is required")
-			.max(50, "state cannot exceed 50 characters"),
+			.max(50, "state cannot exceed 50 characters")
+			.toLowerCase()
+			.trim(),
 
 		country: z
 			.string()
 			.min(1, "country is required")
-			.max(50, "country cannot exceed 50 characters"),
+			.max(50, "country cannot exceed 50 characters")
+			.toLowerCase()
+			.trim(),
 
 		zipCode: z
 			.string()
 			.min(4, "zip code is required")
-			.max(8, "cannot exceed 8 characters"),
+			.max(8, "cannot exceed 8 characters")
+			.trim(),
 	}),
 });
 

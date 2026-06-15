@@ -1,6 +1,6 @@
 import z from "zod";
 
-export const getProductSchema = z.object({
+export const getJokeSchema = z.object({
 	query: z.object({
 		scope: z.enum(["global", "user"]).default("global"),
 
@@ -19,20 +19,20 @@ export const getProductSchema = z.object({
 	}),
 });
 
-export const findProductByIdSchema = z.object({
+export const findJokeByIdSchema = z.object({
 	params: z.object({
-		productid: z
+		jokeid: z
 			.string("Id must be a hexadecimal string")
 			.min(24, "Id must be 24 long hexadecimal string"),
 	}),
 });
 
-export const findProductBySlugSchema = z.object({
+export const findJokeBySlugSchema = z.object({
 	params: z.object({
 		slug: z.string().min(1),
 	}),
 });
-export const findProductByCategorySchema = z.object({
+export const findJokeByCategorySchema = z.object({
 	query: z.object({
 		scope: z.enum(["global", "user"]).default("global"),
 
@@ -56,7 +56,7 @@ export const findProductByCategorySchema = z.object({
 	}),
 });
 
-export const searchProductSchema = z.object({
+export const searchJokeSchema = z.object({
 	query: z.object({
 		scope: z.enum(["global", "user"]).default("global"),
 
@@ -79,66 +79,32 @@ export const searchProductSchema = z.object({
 	}),
 });
 
-export const createProductSchema = z.object({
+export const createJokeSchema = z.object({
 	body: z.object({
-		name: z
+		setup: z
 			.string()
-			.min(1, "Name is required")
-			.max(150, "Name cannot exceed 150 characters")
+			.min(1, "Joke setup is required")
+			.max(200, "Joke setup cannot exceed 200 characters")
+			.toLowerCase()
+			.trim(),
+
+		punchline: z
+			.string()
+			.min(1, "punchline is required")
+			.max(200, "punchline cannot exceed 200 characters")
 			.toLowerCase()
 			.trim(),
 
 		category: z
 			.string()
-			.min(1, "Category is required")
-			.max(150, "Category cannot exceed 150 characters")
+			.min(1, "category is required")
+			.max(50, "category cannot exceed 50 characters")
 			.toLowerCase()
 			.trim(),
-
-		description: z
-			.string()
-			.min(1, "description is required")
-			.max(1000, "description cannot exceed 1000 characters")
-			.toLowerCase()
-			.trim(),
-
-		// Coerce string fields from form-data safely into numerical types
-		price: z.coerce
-			.number("Price must be a valid number")
-			.int("Price must be an integer")
-			.nonnegative("Price cannot be negative")
-			.default(0),
-
-		salePrice: z.coerce
-			.number("Sale price must be a valid number")
-			.int("Sale price must be an integer")
-			.nonnegative("Sale price cannot be negative")
-			.optional()
-			.default(0),
-
-		stock: z.coerce
-			.number("Stock must be a valid number")
-			.int("Stock must be an integer")
-			.nonnegative("Stock cannot be negative")
-			.default(0),
-
-		images: z
-			.array(
-				z.object({
-					url: z.string().url("Invalid image URL"),
-					publicId: z.string().min(1, "Cloudinary asset public id is required"),
-				}),
-			)
-			.min(1, "A product must have at least one image."),
-
-		isActive: z
-			.preprocess((val) => val === "true" || val === true, z.boolean())
-			.optional()
-			.default(true),
 	}),
 });
 
-export const deleteProductSchema = z.object({
+export const deleteJokeSchema = z.object({
 	query: z.object({
 		id: z
 			.string("Id is required to delete a product")

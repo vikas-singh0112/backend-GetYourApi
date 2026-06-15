@@ -5,6 +5,7 @@ import { verifyJwtSecret } from "../models/api.models/user.model";
 import {
 	createProductSchema,
 	deleteProductSchema,
+	findProductByCategorySchema,
 	findProductByIdSchema,
 	findProductBySlugSchema,
 	getProductSchema,
@@ -20,6 +21,7 @@ const productService = factoryFun({
 	Model: Product,
 	ModelName: "Product",
 	SearchField: "slug",
+	Category: "category",
 });
 
 export const getProducts = asyncHandler(async (req, res) => {
@@ -48,6 +50,25 @@ export const findProductBySlug = asyncHandler(async (req, res) => {
 	const { slug } = findProductBySlugSchema.shape.params.parse(req.params);
 
 	const data = await productService.findBySlug(slug);
+
+	return res.status(200).json(data);
+});
+export const findProductByCategory = asyncHandler(async (req, res) => {
+	const { limit, page, scope } = findProductByCategorySchema.shape.query.parse(
+		req.query,
+	);
+	const { category } = findProductByCategorySchema.shape.params.parse(
+		req.params,
+	);
+	const authHeader = req.headers.authorization;
+
+	const data = await productService.findByCategory!(
+		limit,
+		authHeader as string,
+		scope,
+		category,
+		page,
+	);
 
 	return res.status(200).json(data);
 });
@@ -120,7 +141,10 @@ export const createProduct = asyncHandler(async (req, res) => {
 
 			if (files && files.length > 0) {
 				for (const file of files) {
-					const uploadResult = await uploadToCloudinary(file.path, `products/${id}`);
+					const uploadResult = await uploadToCloudinary(
+						file.path,
+						`products/${id}`,
+					);
 
 					if (uploadResult) {
 						uploadedImages.push({
@@ -162,6 +186,7 @@ export const createProduct = asyncHandler(async (req, res) => {
 		}
 	}
 
+	// fake response and send the product data
 	if (files.length > 0) {
 		req.body.images = files.map(() => ({
 			url: "https://example.com/mock-placeholder-image.png",
@@ -179,7 +204,7 @@ export const createProduct = asyncHandler(async (req, res) => {
 		data: productData,
 		statusCode: 201,
 		message:
-			"product created, its a mock response for actually creating user signin and copy the secret token and send the token as authorization header along with data",
+			"product created, its a mock response for actually creating product signin and copy the secret token and send the token as authorization header along with data",
 	});
 
 	return res.status(201).json(data);

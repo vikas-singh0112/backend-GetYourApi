@@ -4,24 +4,23 @@ import { ApiError } from "./apiError";
 import { verifyJwtSecret } from "../models/api.models/user.model";
 import { v2 as cloudinary } from "cloudinary";
 
-interface CloudinaryImage {
-	publicId: string;
-	url?: string;
-}
-type Props<
-	T extends { developerId: Types.ObjectId; images?: CloudinaryImage[] },
-> = {
+type Props<T> = {
 	Model: mongooseModel<T>;
 	ModelName: string;
 	SearchField: keyof T;
+	Category?: keyof T;
 };
 
-const factoryFun = <
-	T extends { developerId: Types.ObjectId; images?: CloudinaryImage[] },
->({
+type DeleteProps = {
+	images: [{ url: string; publicId: string }];
+	developerId: Types.ObjectId;
+};
+
+const factoryFun = <T>({
 	Model,
 	ModelName,
 	SearchField,
+	Category,
 }: Props<T>) => {
 	return {
 		getData: async (
@@ -128,6 +127,83 @@ const factoryFun = <
 			return response;
 		},
 
+		...(Category && {
+			findByCategory: async (
+				limit: number,
+				authHeader: string,
+				scope: string,
+				category: string,
+				page: number,
+			) => {
+				let developerId: Types.ObjectId | null = null;
+				if (scope === "user") {
+					if (!authHeader || !authHeader.startsWith("Bearer ")) {
+						throw new ApiError({
+							statusCode: 401,
+							message: "Unauthorized: User scope requires a valid secret token",
+						});
+					}
+
+					const token = authHeader.split(" ")[1];
+
+					developerId = await verifyJwtSecret(token as string);
+				}
+
+				// pagination
+				const skip = (page - 1) * limit;
+
+				const sanitizedQuery = category.replace(" ", "-");
+
+				const filter = {
+					developerId,
+					[Category]: {
+						$regex: sanitizedQuery,
+						$options: "i",
+					},
+				};
+
+				const [data, totalItems] = await Promise.all([
+					Model.find(filter)
+						.skip(skip)
+						.limit(limit)
+						.select("-isGlobal -developerId -__v"),
+
+					Model.countDocuments(filter),
+				]);
+
+				if (!data || data.length === 0) {
+					throw new ApiError({
+						statusCode: 404,
+						message: `${ModelName} not found`,
+					});
+				}
+
+				const totalPages = Math.ceil(totalItems / limit);
+				const hasNextPage = page < totalPages;
+				const hasPrevPage = page > 1;
+
+				const response = ApiResponse({
+					data: {
+						[`${ModelName.toLowerCase()}s`]: data,
+						pagination: {
+							totalItems,
+							totalPages,
+							currentPage: page,
+							limit,
+							hasNextPage,
+							hasPrevPage,
+							nextPage: hasNextPage ? page + 1 : null,
+							prevPage: hasPrevPage ? page - 1 : null,
+						},
+					},
+					statusCode: 200,
+					message: `${ModelName}s search success`,
+				});
+
+				return response;
+			},
+		}),
+
 		search: async (
 			limit: number,
 			authHeader: string,
@@ -149,23 +225,26 @@ const factoryFun = <
 				developerId = await verifyJwtSecret(token as string);
 			}
 
+			// pagination
 			const skip = (page - 1) * limit;
 
 			const sanitizedQuery = q.replace(" ", "-");
 
+			const filter = {
+				developerId,
+				[SearchField]: {
+					$regex: sanitizedQuery,
+					$options: "i",
+				},
+			};
+
 			const [data, totalItems] = await Promise.all([
-				Model.find({
-					developerId,
-					[SearchField]: {
-						$regex: sanitizedQuery,
-						$options: "i",
-					},
-				})
+				Model.find(filter)
 					.skip(skip)
 					.limit(limit)
 					.select("-isGlobal -developerId -__v"),
 
-				Model.countDocuments({ developerId }),
+				Model.countDocuments(filter),
 			]);
 
 			if (!data || data.length === 0) {
@@ -201,7 +280,7 @@ const factoryFun = <
 		},
 
 		delete: async (authHeader: string, id: string) => {
-			const data = await Model.findById(id);
+			const data: DeleteProps | null = await Model.findById(id);
 			if (!data) {
 				throw new ApiError({
 					statusCode: 404,
@@ -214,6 +293,7 @@ const factoryFun = <
 
 				const developerId = await verifyJwtSecret(token as string);
 
+
 				const publicIdsToDelete: string[] = [];
 
 				if (data.images) {
@@ -224,6 +304,8 @@ const factoryFun = <
 					}
 				}
 
+
+				// .only delete if data.developer is equal to developer id from auth header
 				if (data.developerId.equals(developerId)) {
 					// Batch delete the images from Cloudinary
 					if (publicIdsToDelete.length > 0) {

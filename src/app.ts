@@ -40,10 +40,11 @@ app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use(express.static("public"));
 
 // route imports
-import authRouter from "./routes/auth.routes";
-import userRouter from "./routes/user.routes";
+import authRouter from "./routes/auth.route";
+import userRouter from "./routes/user.route";
 import todoRouter from "./routes/todo.route";
 import productRouter from "./routes/product.route";
+import jokeRouter from "./routes/joke.route";
 
 // route initialize
 // auth
@@ -53,6 +54,7 @@ app.use("/api/auth", cors(authCors), authRouter);
 app.use("/api/users", cors(publicCors), userRouter);
 app.use("/api/todos", cors(publicCors), todoRouter);
 app.use("/api/products", cors(publicCors), productRouter);
+app.use("/api/jokes", cors(publicCors), jokeRouter);
 
 // global error handler
 app.use(globalErrorHandler);

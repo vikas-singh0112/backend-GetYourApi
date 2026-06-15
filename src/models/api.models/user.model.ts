@@ -81,16 +81,19 @@ const userSchema = new Schema<IUser>(
 			type: String,
 			required: [true, "City is required"],
 			maxlength: [100, "City cannot exceed 100 characters"],
+			lowercase: true,
 		},
 		state: {
 			type: String,
 			required: [true, "State is required"],
 			maxlength: [100, "State cannot exceed 100 characters"],
+			lowercase: true,
 		},
 		country: {
 			type: String,
 			required: [true, "Country is required"],
 			maxlength: [100, "Country cannot exceed 100 characters"],
+			lowercase: true,
 		},
 		zipCode: {
 			type: String,

@@ -135,7 +135,7 @@ export const createUser = asyncHandler(async (req, res) => {
 		return res.status(201).json(data);
 	}
 
-	// fake response and send the user data
+	// fake response and send the todo data
 	const data = ApiResponse({
 		data: userData,
 		statusCode: 201,

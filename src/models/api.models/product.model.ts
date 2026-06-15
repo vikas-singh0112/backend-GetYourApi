@@ -1,8 +1,9 @@
 import mongoose, { Document, Types, Schema, Model, model } from "mongoose";
 import crypto from "crypto";
 
-export interface IImageProp {
+export interface IImageProp  {
 	url: string;
+	publicId: string;
 }
 export interface IProduct extends Document {
 	name: string;
@@ -41,6 +42,7 @@ const productSchema = new Schema<IProduct>(
 			required: true,
 			trim: true,
 			maxLength: [150, "category cannot exceed 150 characters"],
+			index: true,
 		},
 		description: {
 			type: String,
@@ -89,7 +91,7 @@ const productSchema = new Schema<IProduct>(
 		isGlobal: {
 			type: Boolean,
 			required: true,
-			default: false,
+			default: true,
 		},
 		developerId: {
 			type: Schema.Types.ObjectId,
@@ -102,7 +104,7 @@ const productSchema = new Schema<IProduct>(
 );
 
 productSchema.pre("save", async function () {
-	if (!this.isModified("name") || !this.isModified("category")) return;
+	if (!this.isModified("name")) return;
 
 	const generatedSlug = this.name
 		.toString()
