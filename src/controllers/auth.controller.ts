@@ -9,9 +9,12 @@ interface JwtPayload {
 }
 
 export const googleCallback = (req: Request, res: Response): void => {
+	console.log("OAuth Callback - req.user:", req.user);
+	
 	const consumer = req.user as IConsumer;
 
 	if (!consumer) {
+		console.log("No consumer found, redirecting to signin");
 		const failureUrl = process.env.FRONTEND_ORIGINS || "http://localhost:5173";
 		res.redirect(`${failureUrl}/signin`);
 		return;
@@ -31,6 +34,7 @@ export const googleCallback = (req: Request, res: Response): void => {
 	});
 
 	const successUrl = process.env.FRONTEND_ORIGINS || "http://localhost:5173";
+	console.log("OAuth successful, redirecting to:", successUrl + "/dashboard");
 	res.redirect(`${successUrl}/dashboard`);
 };
 
