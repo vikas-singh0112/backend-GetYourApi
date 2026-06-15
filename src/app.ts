@@ -62,12 +62,12 @@ setInterval(async () => {
 }, 600000);
 
 // config
-// app.use(
-// 	cors({
-// 		credentials: true,
-// 		origin: process.env.FRONTEND_ORIGINS,
-// 	}),
-// );
+app.use(
+	cors({
+		credentials: true,
+		origin: process.env.FRONTEND_ORIGINS,
+	}),
+);
 app.use(cookieParser());
 
 app.use(express.json({ limit: "16kb" }));
