@@ -62,12 +62,12 @@ setInterval(async () => {
 }, 600000);
 
 // config
-app.use(
-	cors({
-		credentials: true,
-		origin: process.env.FRONTEND_ORIGINS,
-	}),
-);
+// app.use(
+// 	cors({
+// 		credentials: true,
+// 		origin: process.env.FRONTEND_ORIGINS,
+// 	}),
+// );
 app.use(cookieParser());
 
 app.use(express.json({ limit: "16kb" }));
@@ -79,7 +79,7 @@ app.use(express.static("public"));
 // route initialize
 
 // auth route
-app.use("/api/auth", authRouter);
+app.use("/api/auth", cors(authCors),authRouter);
 
 // non auth routes
 app.use("/api/users", cors(publicCors), userRouter);

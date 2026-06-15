@@ -12,7 +12,7 @@ export const googleCallback = (req: Request, res: Response): void => {
 	const consumer = req.user as IConsumer;
 
 	if (!consumer) {
-		res.redirect(`${process.env.FRONTEND_ORIGINS}/signin`);
+		res.redirect("http://localhost:5173/signin");
 		return;
 	}
 
@@ -29,13 +29,13 @@ export const googleCallback = (req: Request, res: Response): void => {
 		sameSite: "lax",
 	});
 
-	res.redirect(`${process.env.FRONTEND_ORIGINS}/dashboard`);
+	res.redirect("http://localhost:5173/dashboard");
 };
 
 export const getCurrentConsumer = async (
 	req: Request,
 	res: Response,
-	): Promise<Response> => {
+): Promise<Response> => {
 	const token = req.cookies?.auth_token;
 
 	if (!token) {
