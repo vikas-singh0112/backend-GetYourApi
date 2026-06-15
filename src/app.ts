@@ -32,6 +32,26 @@ const publicCors: CorsOptions = {
 	maxAge: 86400,
 };
 
+// ping to own backend to keep it alive
+const BACKEND_URL = "https://getyourapi.onrender.com";
+app.get("/ping", (req, res) => {
+	res.status(200).send("Awake");
+});
+
+setInterval(async () => {
+	try {
+		await axios.get(BACKEND_URL);
+		console.log("Self-ping successful: Staying awake!");
+	} catch (error: unknown) {
+		if (axios.isAxiosError(error)) {
+			console.error("Self-ping failed:", error.message);
+		} else {
+			console.error("Self-ping failed:", error);
+		}
+	}
+}, 600000);
+
+// config
 app.use(cookieParser());
 
 app.use(express.json({ limit: "16kb" }));
@@ -47,6 +67,7 @@ import todoRouter from "./routes/todo.route.js";
 import productRouter from "./routes/product.route.js";
 import jokeRouter from "./routes/joke.route.js";
 import { ApiError } from "./utils/apiError.js";
+import axios, { AxiosError } from "axios";
 
 // route initialize
 
