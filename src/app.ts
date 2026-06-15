@@ -60,7 +60,7 @@ app.use("/api/products", cors(publicCors), productRouter);
 app.use("/api/jokes", cors(publicCors), jokeRouter);
 
 // catch wildcard routes
-app.all("(.*)", cors(publicCors), (req, res, next) => {
+app.all("{/:path*}?", cors(publicCors), (req, res, next) => {
 	const error = new ApiError({
 		statusCode: 404,
 		message: `Route '${req.originalUrl}' not found on this server with method [${req.method}]`,
