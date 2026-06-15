@@ -10,6 +10,7 @@ const frontendOrigins = (process.env.FRONTEND_ORIGINS || "")
 	.map((o) => o.trim())
 	.filter(Boolean);
 
+// cors config
 const authCors: CorsOptions = {
 	origin: (origin, cb) => {
 		// allow non-browser clients (no Origin header)
@@ -45,9 +46,11 @@ import userRouter from "./routes/user.route";
 import todoRouter from "./routes/todo.route";
 import productRouter from "./routes/product.route";
 import jokeRouter from "./routes/joke.route";
+import { ApiError } from "./utils/apiError";
 
 // route initialize
-// auth
+
+// auth route
 app.use("/api/auth", cors(authCors), authRouter);
 
 // non auth routes
@@ -55,6 +58,15 @@ app.use("/api/users", cors(publicCors), userRouter);
 app.use("/api/todos", cors(publicCors), todoRouter);
 app.use("/api/products", cors(publicCors), productRouter);
 app.use("/api/jokes", cors(publicCors), jokeRouter);
+
+// catch wildcard routes
+app.all("*", cors(publicCors), (req, res, next) => {
+	const error = new ApiError({
+		statusCode: 404,
+		message: `Route '${req.originalUrl}' not found on this server with method [${req.method}]`,
+	});
+	next(error);
+});
 
 // global error handler
 app.use(globalErrorHandler);
