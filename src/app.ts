@@ -51,7 +51,7 @@ app.get("/ping", (req, res) => {
 
 setInterval(async () => {
 	try {
-		await axios.get(BACKEND_URL);
+		await axios.get(`${BACKEND_URL}/ping`);
 		console.log("Self-ping successful: Staying awake!");
 	} catch (error: unknown) {
 		if (axios.isAxiosError(error)) {
