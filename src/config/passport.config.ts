@@ -11,12 +11,6 @@ passport.use(
 		},
 		async (accessToken, refreshToken, profile, done) => {
 			try {
-				console.log("Google Strategy - Profile:", {
-					id: profile.id,
-					displayName: profile.displayName,
-					emails: profile.emails,
-				});
-
 				const userEmail = profile.emails?.[0]?.value;
 
 				if (!userEmail) {
@@ -29,20 +23,15 @@ passport.use(
 
 				let user = await Consumer.findOne({ googleId: profile.id });
 				if (!user) {
-					console.log("Creating new user:", userEmail);
 					user = await Consumer.create({
 						googleId: profile.id,
 						displayName: profile.displayName,
 						email: userEmail,
 						avatar: (profile as any).photos?.[0]?.value || "",
 					});
-					console.log("User created:", user._id);
-				} else {
-					console.log("User found:", user._id);
 				}
 				return done(null, user);
 			} catch (err) {
-				console.error("Passport Strategy Error:", err);
 				return done(err, false);
 			}
 		},
