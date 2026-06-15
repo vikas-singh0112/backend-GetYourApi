@@ -10,7 +10,7 @@ interface JwtPayload {
 
 export const googleCallback = (req: Request, res: Response): void => {
 	console.log("OAuth Callback - req.user:", req.user);
-	
+
 	const consumer = req.user as IConsumer;
 
 	if (!consumer) {
