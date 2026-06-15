@@ -62,7 +62,7 @@ setInterval(async () => {
 }, 600000);
 
 // config
-app.options("*", cors(authCors));
+app.options("/*", cors(authCors));
 app.use(cookieParser());
 
 app.use(express.json({ limit: "16kb" }));
