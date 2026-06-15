@@ -2,8 +2,8 @@ import { Router } from "express";
 import passport from "../config/passport.config.js";
 import {
 	googleCallback,
-    getCurrentConsumer,
-    logoutConsumer,
+	getCurrentConsumer,
+	logoutConsumer,
 	getSecretToken,
 } from "../controllers/auth.controller.js";
 
@@ -21,7 +21,7 @@ authRouter.get(
 authRouter.get(
 	"/google/callback",
 	passport.authenticate("google", {
-		failureRedirect: "http://localhost:5173/signin",
+		failureRedirect: `${process.env.FRONTEND_ORIGINS}/signin`,
 		session: false,
 	}),
 	googleCallback,

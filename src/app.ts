@@ -2,6 +2,15 @@ import express from "express";
 import cors, { CorsOptions } from "cors";
 import cookieParser from "cookie-parser";
 import { globalErrorHandler } from "./middlewares/globalError.js";
+import axios from "axios";
+
+// route imports
+import authRouter from "./routes/auth.route.js";
+import userRouter from "./routes/user.route.js";
+import todoRouter from "./routes/todo.route.js";
+import productRouter from "./routes/product.route.js";
+import jokeRouter from "./routes/joke.route.js";
+import { ApiError } from "./utils/apiError.js";
 
 const app = express();
 
@@ -33,7 +42,8 @@ const publicCors: CorsOptions = {
 };
 
 // ping to own backend to keep it alive
-const BACKEND_URL = "https://getyourapi.onrender.com";
+const BACKEND_URL = process.env.BACKEND_URL!;
+
 app.get("/ping", (req, res) => {
 	res.status(200).send("Awake");
 });
@@ -60,14 +70,7 @@ app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 
 app.use(express.static("public"));
 
-// route imports
-import authRouter from "./routes/auth.route.js";
-import userRouter from "./routes/user.route.js";
-import todoRouter from "./routes/todo.route.js";
-import productRouter from "./routes/product.route.js";
-import jokeRouter from "./routes/joke.route.js";
-import { ApiError } from "./utils/apiError.js";
-import axios, { AxiosError } from "axios";
+
 
 // route initialize
 
