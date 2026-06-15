@@ -36,4 +36,18 @@ passport.use(
 	),
 );
 
+// Serialize and deserialize user (required by Passport)
+passport.serializeUser((user: any, done) => {
+	done(null, user._id);
+});
+
+passport.deserializeUser(async (id: string, done) => {
+	try {
+		const user = await Consumer.findById(id);
+		done(null, user);
+	} catch (err) {
+		done(err, null);
+	}
+});
+
 export default passport;

@@ -20,13 +20,10 @@ authRouter.get(
 // Target endpoint for Google's redirect URI
 authRouter.get(
 	"/google/callback",
-	(req, res, next) => {
-		const failureRedirect = `${process.env.FRONTEND_ORIGINS || "http://localhost:5173"}/signin`;
-		passport.authenticate("google", {
-			failureRedirect,
-			session: false,
-		})(req, res, next);
-	},
+	passport.authenticate("google", {
+		failureRedirect: `${process.env.FRONTEND_ORIGINS || "http://localhost:5173"}/signin`,
+		session: false,
+	}),
 	googleCallback,
 );
 
