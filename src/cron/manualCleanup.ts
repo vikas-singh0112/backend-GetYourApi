@@ -4,6 +4,7 @@ import User from "../models/api.models/user.model.js";
 import Todo from "../models/api.models/todo.model.js";
 import cron from "node-cron";
 import { v2 as cloudinary } from "cloudinary";
+import Joke from "../models/api.models/joke.model.js";
 
 interface CleanupTarget {
 	name: string;
@@ -15,6 +16,7 @@ const cleanupTargets: CleanupTarget[] = [
 	{ name: "Users", model: User, hasImages: false },
 	{ name: "Todos", model: Todo, hasImages: false },
 	{ name: "Products", model: Product, hasImages: true },
+	{ name: "Jokes", model: Joke, hasImages: false },
 ];
 
 export const manualCleanupCronJob = () => {
