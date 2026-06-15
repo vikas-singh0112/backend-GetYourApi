@@ -28,14 +28,17 @@ export const googleCallback = (req: Request, res: Response): void => {
 
 	res.cookie("auth_token", token, {
 		httpOnly: true,
-		secure: process.env.NODE_ENV === "production",
+		secure: true,
 		maxAge: 24 * 60 * 60 * 1000, // 24 hours
-		sameSite: "lax",
+		sameSite: "none",
 	});
 
 	const successUrl = process.env.FRONTEND_ORIGINS || "http://localhost:5173";
-	console.log("OAuth successful, redirecting to:", successUrl + "/dashboard");
-	res.redirect(`${successUrl}/dashboard`);
+	console.log(
+		"OAuth successful, redirecting to:",
+		successUrl + "/dashboard?token=" + token,
+	);
+	res.redirect(`${successUrl}/dashboard?token=${token}`);
 };
 
 export const getCurrentConsumer = async (

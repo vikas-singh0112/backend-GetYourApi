@@ -25,7 +25,7 @@ const authCors: CorsOptions = {
 	origin: (origin, cb) => {
 		// allow non-browser clients (no Origin header)
 		if (!origin) return cb(null, true);
-		if (frontendOrigins.includes(origin)) return cb(null, true);
+		if (frontendOrigins.includes(origin)) return cb(null, origin); // Return the origin
 		return cb(new Error("CORS blocked"), false);
 	},
 	credentials: true,
